@@ -1,0 +1,59 @@
+# Flutter Web → GitHub Pages (ücretsiz)
+# Repo: https://github.com/hcakil/insur_flow
+# Yayın URL (Pages açıldıktan sonra): https://hcakil.github.io/insur_flow/
+
+name: Deploy Flutter Web to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Dependencies
+        run: flutter pub get
+
+      # Proje kökü /insur_flow/ altında servis edilir — router & asset yolları için zorunlu
+      - name: Build web
+        run: flutter build web --release --base-href /insur_flow/
+
+      # GitHub Pages SPA: bilinmeyen path'te 404.html döner; kopya olunca Flutter router çalışır
+      - name: SPA fallback (404 = index)
+        run: cp build/web/index.html build/web/404.html
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

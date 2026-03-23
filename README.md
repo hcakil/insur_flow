@@ -125,6 +125,29 @@ The top navigation bar (`TopNavBar`) navigates with `Get.toNamed(...)`.
 
 ---
 
+## Deploy: GitHub Pages (free)
+
+The repo includes [`.github/workflows/deploy_github_pages.yml`](.github/workflows/deploy_github_pages.yml). It builds Flutter web with `--base-href /insur_flow/` (must match your **repository name** on GitHub) and publishes to **GitHub Pages**.
+
+### One-time setup on GitHub
+
+1. Repo → **Settings** → **Pages**
+2. Under **Build and deployment** → **Source**: choose **GitHub Actions** (not “Deploy from a branch” unless you prefer that)
+3. Push `main` (with the workflow file). **Actions** tab should show a green run
+4. After success, the site is at: **`https://hcakil.github.io/insur_flow/`**  
+   (If you rename the repo, update `--base-href` in the workflow to `/NEW_REPO_NAME/`)
+
+### Local test (same as CI)
+
+```bash
+flutter build web --release --base-href /insur_flow/
+# Serve build/web with any static server; paths must match base-href
+```
+
+The workflow copies `index.html` → `404.html` so refreshing on a deep route still loads the app (GitHub Pages SPA pattern).
+
+---
+
 ## License
 
 This project is private / not published to pub.dev (see `pubspec.yaml` → `publish_to: 'none'`). Add a proper license file if you open-source the repo.
